@@ -1,0 +1,137 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function() {
+    Route::post('logout', [AuthController::class, 'logout']);
+
+});
+
+
+<?php
+
+namespace App\Traits;
+
+trait ApiResponsesTrait
+{
+
+    public function successResponse(string $message, array $data = [], int $statusCode = 200)
+    {
+        return response()->json([
+            'status' => 'success',
+            'message' => $message ?? "success",
+            'data' => $data, [],
+            'errors' => [],
+        ], $statusCode);
+    }
+
+
+    public function errorResponse(string $message, array $errors = [], int $statusCode = 404)
+    {
+        return response()->json([
+            'status' => 'failed',
+            'message' => $message ?? "failed",
+            'data' => [],
+            'errors' => $errors ?? [],
+        ], $statusCode);
+    }
+}
+
+
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Traits\ApiResponsesTrait;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class AuthController extends Controller
+{
+
+    use ApiResponsesTrait;
+
+    public function register(Request $request)
+    {
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|max:12|unique:users,phone',
+            'password' => 'required|string|min:8',
+        ]);
+
+        $user = User::create($validated);
+
+        $user['access_token'] = $user->createToken('auth_token')->plainTextToken;
+
+        return $this->successResponse(
+            message: 'user has been registered successfully',
+            data: [
+                'user' => $user,
+                'token_type' => 'Bearer',
+            ],
+            statusCode: 201
+        );
+    }
+
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|string',
+            'password' => 'required|string',
+        ]);
+
+
+        if (! Auth::attempt($request->only('email', 'password'))) {
+            return $this->errorResponse(message: ' The provided credentials are incorrect.', statusCode: 401);
+        }
+
+        $user = Auth::user();
+
+        $user['access_token'] = $user->createToken('auth_token')->plainTextToken;
+
+        return $this->successResponse(
+            message: 'you have login successfully',
+            data: [
+                'user' => $user,
+                'token_type' => "Bearer"
+            ],
+        );
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return $this->successResponse(message: 'you have logout successfully');
+    }
+}
