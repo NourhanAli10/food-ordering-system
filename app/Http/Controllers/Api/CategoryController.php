@@ -30,7 +30,7 @@ use ApiResponsesTrait;
      */
 
     public function show(string $id) {
-        $category = Category::where('is_active', true)->findOrFail($id);
+        $category = Category::with('products')->where('is_active', true)->findOrFail($id);
         return $this->successResponse(
             data: [
                 'category' => $category
