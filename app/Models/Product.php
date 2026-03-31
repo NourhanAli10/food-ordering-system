@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Cart;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,11 +16,16 @@ class Product extends Model
         'image',
         'price', 
         'discount_price', 
-        'category_id'
+        'category_id', 
+        'offer_id'
     ];
 
 
     public function category() {
         return $this->belongsTo(Category::class);
+    }
+
+    public function cartItems() {
+        return $this->hasMany(Cart::class);
     }
 }
