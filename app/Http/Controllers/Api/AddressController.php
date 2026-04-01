@@ -30,6 +30,25 @@ class AddressController extends Controller
         );
     }
 
+    /**
+     * get a single  user's address
+     */
+
+
+    public function show(Request $request, string $id)
+    {
+        $user = $request->user();
+        $address = $user->addresses()->findOrFail($id);
+
+
+        return $this->successResponse(
+            data: [
+                'address' => $address
+            ],
+        );
+    }
+
+
 
     /**
      * Add new address
@@ -37,11 +56,10 @@ class AddressController extends Controller
 
     public function store(Request $request)
     {
-
         $validated = $request->validate([
             'address' => 'required|string|max:255',
             'apartment' => 'required|string|max:20',
-            'floor' => 'required|string|max:20',
+            'floor' => 'required|string|min:1|max:20',
             'city' => 'required|string|max:100',
             'is_default' => 'boolean'
         ]);
