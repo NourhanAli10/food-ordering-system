@@ -9,23 +9,35 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'name', 
-        'description', 
-        'slug', 
+        'name',
+        'description',
+        'slug',
         'status',
         'image',
-        'price', 
-        'discount_price', 
-        'category_id', 
+        'price',
+        'discount_price',
+        'category_id',
         'offer_id'
     ];
 
 
-    public function category() {
+    public function category()
+    {
         return $this->belongsTo(Category::class);
     }
 
-    public function cartItems() {
+    public function cartItems()
+    {
         return $this->hasMany(Cart::class);
     }
+
+
+     public function offerGroups() {
+        return $this->belongsToMany(offerGroup::class, 'offer_group_products')->withPivot('extra_price');
+
+    }
+
+    
+
+
 }
