@@ -12,6 +12,7 @@ class Address extends Model
         'address', 
         'floor',
         'apartment',
+        'building_number',
         'city',
         'is_default'
     ];

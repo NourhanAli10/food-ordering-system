@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('areas', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->decimal('delivery_fee', 8,2);
+            $table->decimal('delivery_fee', 8, 2);
             $table->foreignId('city_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });

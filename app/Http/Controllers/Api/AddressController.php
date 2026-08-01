@@ -59,8 +59,9 @@ class AddressController extends Controller
         $validated = $request->validate([
             'address' => 'required|string|max:255',
             'apartment' => 'required|string|max:20',
+            'building_number' => 'required|string|max:20',
             'floor' => 'required|string|min:1|max:20',
-            'city' => 'required|string|max:100',
+            'city' => 'required|string|max:100|exists:cities,name',
             'is_default' => 'boolean'
         ]);
 
@@ -92,8 +93,9 @@ class AddressController extends Controller
         $validated = $request->validate([
             'address' => 'sometimes|string|max:255',
             'apartment' => 'sometimes|string|max:20',
+            'building_number' => 'sometimes|string|max:20',
             'floor' => 'sometimes|string|max:20',
-            'city' => 'sometimes|string|max:100',
+            'city' => 'sometimes|string|max:100|exists:cities,name',
             'is_default' => 'boolean'
         ]);
         $userId = $request->user()->id;
