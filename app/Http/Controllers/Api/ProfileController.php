@@ -80,7 +80,5 @@ class ProfileController extends Controller
     }
 
 
-    /**
-     * Delete account
-     */
+    
 }
