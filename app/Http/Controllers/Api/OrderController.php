@@ -64,10 +64,11 @@ class OrderController extends Controller
 
         $userId = $request->user()->id;
 
-        $cartItems = Cart::with('product')->where('user_id', $userId)->get();
+        $cartItems = Cart::with('product', 'offer', 'choices.product')->where('user_id', $userId)->get();
         if ($cartItems->isEmpty()) {
             return $this->errorResponse(message: 'Cart is empty');
         }
+
 
         try {
             $order = DB::transaction(function () use ($userId, $validated, $cartItems) {
@@ -76,9 +77,17 @@ class OrderController extends Controller
                 $subtotal = 0;
 
                 foreach ($cartItems as $item) {
-                    $price = $item->product->price * $item->quantity;
-                    $subtotal += $price;
+                    if ($item->product_id && !$item->offer_id) {
+                        $price = ($item->product->discount_price ?? $item->product->price) * $item->quantity;
+                        $subtotal += $price;
+                    }
+                    // ─── Offer ────────────────────────────────
+                    else {
+                        $price = $item->price * $item->quantity;
+                        $subtotal += $price;
+                    }
                 }
+
 
                 $discount = 0;
 
@@ -104,9 +113,9 @@ class OrderController extends Controller
                     'coupon_id' => $coupon?->id,
                     'name' => $validated['name'],
                     'phone' => $validated['phone'],
-                    'second_phone' => $validated['second_phone'],
+                    'second_phone' => $validated['second_phone'] ?? null,
                     'area_id' => $validated['area_id'],
-                    'email' => $validated['email'],
+                    'email' => $validated['email'] ?? null,
                     'address' => $validated['address'],
                     'floor' => $validated['floor'],
                     'building_number' => $validated['building_number'],
@@ -121,16 +130,23 @@ class OrderController extends Controller
                     'tax' => $vat,
                     'delivery_fee' => $deliveryFee,
                     'total' => $total,
-                    'notes' => $validated['notes'],
+                    'notes' => $validated['notes'] ?? null,
                 ]);
 
                 foreach ($cartItems as $item) {
+                    $itemPrice = 0;
+                    if ($item->product_id && !$item->offer_id) {
+                        $itemPrice = $item->product->discount_price ??  $item->product->price;
+                    } else {
+                        $itemPrice = $item->price;
+                    }
                     OrderItem::create([
                         'order_id' => $order->id,
                         'user_id' => $userId,
                         'name' => $item->product->name,
-                        'product_id' => $item->product->id,
-                        'price' => $item->product->price,
+                        'product_id' => $item->product->id ?? null,
+                        'offer_id' => $item->offer->id ?? null,
+                        'price' => $itemPrice,
                         'quantity' => $item->quantity,
                         'total' => $item->product->price * $item->quantity,
                     ]);
