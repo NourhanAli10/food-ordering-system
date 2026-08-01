@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Traits\ApiResponsesTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -16,7 +17,7 @@ class AuthController extends Controller
     {
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|min:2',
             'email' => 'required|email|unique:users,email',
             'phone' => 'required|string|max:12|unique:users,phone',
             'role' => 'nullable|in:customer,admin',
@@ -32,7 +33,7 @@ class AuthController extends Controller
             data: [
                 'user' => $user,
                 'token_type' => 'Bearer',
-                'access_token' => $token,
+                'token' => $token,
             ],
             statusCode: 201
         );
@@ -48,7 +49,7 @@ class AuthController extends Controller
 
 
         if (! Auth::attempt($request->only('email', 'password'))) {
-            return $this->errorResponse(message: ' The provided credentials are incorrect.', statusCode: 401);
+            return $this->errorResponse(message: 'The provided credentials are incorrect.', statusCode: 401);
         }
 
         $user = Auth::user();
@@ -60,7 +61,7 @@ class AuthController extends Controller
             data: [
                 'user' => $user,
                 'token_type' => "Bearer",
-                'access_token' => $token
+                'token' => $token
             ],
         );
     }
