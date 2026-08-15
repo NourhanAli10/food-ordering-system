@@ -12,7 +12,9 @@ class OfferController extends Controller
     use ApiResponsesTrait;
 
     public function index() {
-        $offers = Offer::where('status', 'active')->orderBy('created_at', 'DESC')->get();
+        $offers = Offer::isValid()
+        ->orderBy('created_at', 'DESC')
+        ->get();
         return $this->successResponse(
             data: ['offers' => $offers]
         );
