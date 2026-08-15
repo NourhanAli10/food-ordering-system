@@ -34,6 +34,14 @@ class Offer extends Model
         ];
     }
 
+    public function scopeIsValid($query)
+    {
+        return $query
+            ->where('status', 'active')
+            ->where('start_date', '<=', now())
+            ->where('expire_date', '>=', now());
+    }
+
 
 
     public function groups() {
