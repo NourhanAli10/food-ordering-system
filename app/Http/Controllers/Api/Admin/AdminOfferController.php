@@ -101,7 +101,7 @@ class AdminOfferController extends Controller
             'value' => 'sometimes|numeric|min:0',
         ]);
 
-        $offer = Offer::findOrFails($id);
+        $offer = Offer::findOrFail($id);
 
         if ($request->slug) {
             $validated['slug'] = $request->slug;
@@ -131,7 +131,7 @@ class AdminOfferController extends Controller
 
     public function destroy(string $id)
     {
-        $offer = Offer::findOrFails($id);
+        $offer = Offer::findOrFail($id);
         if ($offer->image) {
             $media = new Media;
             $media->delete($offer->image, 'offers');
